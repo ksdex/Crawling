@@ -22,6 +22,9 @@ class Crawler:
         the scraped links to the frontier
         """
         count_dic = {}
+        from datetime import datetime
+        file_path = "logs"+ datetime.now().strftime("%H_%M_%S") + ".txt"
+        f = open(file_path, "a", encoding='utf-8')
         while self.frontier.has_next_url():
             url = self.frontier.get_next_url()
             logger.info("Fetching URL %s ... Fetched: %s, Queue size: %s", url, self.frontier.fetched,
@@ -37,7 +40,8 @@ class Crawler:
                     #else:
                         #count_dic[parse.netloc.lower()] = 1
                     if self.corpus.get_file_name(next_link) is not None:
-                        self.frontier.add_url(next_link)
+                        self.frontier.add_url(next_link, f)
+        f.close()
         # print('max subdomain is', max(count_dic, key=count_dic.get))
 
     def extract_next_links(self, url_data):
@@ -50,55 +54,46 @@ class Crawler:
 
         Suggested library: lxml
         """
-        '''
-        outputLinks = []
-        # if url_data["content_type"].find("text") <= -1:
-        # 'only calculate but no add into list'
-        print(url_data['is_redirected'])
-        print(url_data['final_url'])
-        print(url_data['http_code'])
-        if not url_data['is_redirected']:
-            soup = BeautifulSoup(url_data['content'], "lxml")
-            baseURL = url_data['url']
-            if len(baseURL) < 500:
-                print('baseURL:', baseURL)
-                for link in soup.findAll('a'):
-                    url = link.get('href')
-                    print("----%s" % url)
-                    if None != url:
-                        url = urljoin(baseURL, url)
-                        url = urldefrag(url)[0]
-                    outputLinks.append(url)
-        else:
-            url = url_data['final_url']
-            url = urldefrag(url)[0]
-            outputLinks.append(url)
-        return outputLinks
-
-        '''
         outputLinks = []
         print(url_data['is_redirected'])
         print(url_data['final_url'])
         print(url_data['http_code'])
         soup = BeautifulSoup(url_data['content'], "lxml")
         baseURL = url_data['url']
-        if len(baseURL) < 500:
-            print('baseURL:', baseURL)
-
-            parsed = urlparse(baseURL)
-            log_dict = {"url": baseURL.strip().replace("'", "\'"), "subdomain": parsed.netloc.lower(),
-                        "status": url_data['http_code'], "content_type": url_data['content_type'],
-                        "meet_time": 0, "is_return": 0}
-
-            for link in soup.findAll('a'):
-                url = link.get('href')
-                print("----%s" % url)
-                if url is not None:
-                    url = urljoin(baseURL, url)
+        if len(baseURL) < 200:
+            if not url_data['is_redirected']:
+                print('not True!!!!!!!')
+                print('baseURL:', baseURL)
+                #parsed = urlparse(baseURL)
+                #log_dict = {"url": baseURL.strip().replace("'", "\'"), "subdomain": parsed.netloc.lower(),
+                #            "status": url_data['http_code'], "content_type": url_data['content_type'],
+                #            "meet_time": 0, "is_return": 0}
+                for link in soup.findAll('a'):
+                    url = link.get('href')
+                    if url is not None:
+                        url = urljoin(baseURL, url)
+                        url = urldefrag(url)[0]
+                        outputLinks.append(url)
+                        # print('addurl', url)
+            else:
+                if url_data['final_url'] == url_data['url']:
+                    print('URLs are the same', baseURL)
+                    #parsed = urlparse(baseURL)
+                    for link in soup.findAll('a'):
+                        url = link.get('href')
+                        if url is not None:
+                            url = urljoin(baseURL, url)
+                            url = urldefrag(url)[0]
+                            outputLinks.append(url)
+                else:
+                    print('URLs are not the same')
+                    print('firstURL:', url_data['url'])
+                    print('lenfirstURL:', len(url_data['url']))
+                    print('finalURL:', url_data['final_url'])
+                    print('lenfinalURL:', len(url_data['final_url']))
+                    url = url_data['final_url']
                     url = urldefrag(url)[0]
                     outputLinks.append(url)
-                    print('addurl', url)
-
         return outputLinks
 
     def is_valid(self, url):
@@ -117,17 +112,48 @@ class Crawler:
              I think I have already excluded the calender from the crawling but need more test
              to see if it is all right
         '''
+        if len(url) > 200:
+            return False
         archive_pat = "archive.ics.uci.edu"
         if re.match(archive_pat, parsed.netloc.lower()):
             return False
-        if len(url) > 500:
+        if parsed.query.__contains__('login') or parsed.query.__contains__('action=') or parsed.query.__contains__('format='):
             return False
+        if parsed.path.__contains__('login'):
+            return False
+
         today = r"^today\.uci\.edu$"
         calender = r"^\/department\/information_computer_sciences\/calendar(\/|\?)?((.)+)?$"
         if re.match(today, parsed.netloc.lower()):
             if re.match(calender, parsed.path.lower()):
                 return False
-
+        mailto = r"^mailto:.*"
+        if re.match(mailto, parsed.netloc.lower()):
+            return False
+        wics = r".*wics\.ics\.uci\.edu/.*\?.*$"
+        if re.match(wics, url):
+            return False
+        # prospective = r"ics.uci.edu/prospective/.*$"
+        # if re.match(prospective, parsed.netloc.lower()):
+        #     return False
+        evoke = r".*evoke\.ics\.uci\.edu/.*replytocom=\d{5}$"
+        if re.match(evoke, url):
+            return False
+        cbcl = r".*cbcl\.ics\.uci\.edu/public_data/.*"
+        if re.match(cbcl, url):
+            return False
+        graph = r".*ganglia\.ics\.uci\.edu/graph\.php/.*"
+        if re.match(graph, url):
+            return False
+        flamingo = r".*flamingo\.ics\.uci\.edu/releases/.*"
+        if re.match(flamingo, url):
+            return False
+        files = r".*ics\.uci\.edu/.*\.(lif|csv|m|mexmaci|mexw32|mexglx|c|py)$"
+        if re.match(files, url):
+            return False
+        if parsed.path.__contains__('pix'):
+            return False
+    
         '''
         Sam: what I changed end here
         '''
@@ -138,7 +164,7 @@ class Crawler:
                                     + "|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf" \
                                     + "|ps|eps|tex|ppt|pptx|doc|docx|xls|xlsx|names|data|dat|exe|bz2|tar|msi|bin|7z|psd|dmg|iso|epub|dll|cnf|tgz|sha1" \
                                     + "|thmx|mso|arff|rtf|jar|csv" \
-                                    + "|rm|smil|wmv|swf|wma|zip|rar|gz|pdf)$", parsed.path.lower())
+                                    + "|rm|smil|wmv|swf|wma|zip|rar|gz|pdf|odp)$", parsed.path.lower())
 
         except TypeError:
             print("TypeError for ", parsed)
