@@ -1,6 +1,5 @@
 ### Update on Feb 14, 2020 by Sam:
-Write some code based on my imagination for those tasks in to-do list
-I put them them in comment because I am not sure if they are all right.
+1. Write some code based on my imagination for those tasks in to-do list. I put them them in comment because I am not sure if they are all right.
 
 
 ### Update on Feb 13, 2020 by Tianran:
