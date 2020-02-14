@@ -5,6 +5,7 @@ import pathlib
 import nltk
 import os
 import index as partial
+from collections import deque
 
 """
 mydb = mysql.connector.connect(
@@ -32,27 +33,25 @@ addToIndex(tokenList){
 #f = open("dict.json","w")
 
 
-
 def makeIndex(file):
-  myDictIndex = {}
-  line = file.readline()
-  str = ""
-  while line != "":
-    #print(line)
-    str = str + line
+    myDictIndex = {}
     line = file.readline()
-    freq_dic = partial.parse_content(str)
-      
-  #total = getWordCount(freq_dic)
-  for word in freq_dic:
-    TFIDF = 0
-    docID = getDocID(file)
-    # create an entry of key term in index
-    freq = freq_dic[word] 
-    keyInfo = [docID,freq,TFIDF]
-    # add a value of (docID, freq) to key's linkedlist
-    myDictIndex[word] = (keyInfo)
-  return myDictIndex
+    str = ""
+    while line != "":
+        #print(line)
+        str = str + line
+        line = file.readline()
+        freq_dic = partial.parse_content(str)
+
+    #total = getWordCount(freq_dic)
+    for word in freq_dic:
+        docID = getDocID(file)
+        keyInfo = deque()
+        # create an entry of key term in index
+        keyInfo.append([docID, freq_dic[word]])
+        # add a value of (docID, freq) to key's linkedlist
+        myDictIndex[word] = keyInfo
+    return myDictIndex
     
 
 def getDocID(file):
