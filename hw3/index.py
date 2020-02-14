@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from bs4 import BeautifulSoup
 from collections import defaultdict
@@ -59,7 +60,7 @@ def parse_content(html_content, valid = True):
             for i in filter_token(token):
                 token_list.append(wordnet_lemmatizer.lemmatize(i))
     freq_dict = FreqDist(token_list)
-    print("Finish counting frequency.")
+    #print("Finish counting frequency.")
     return freq_dict
 
 
@@ -76,5 +77,3 @@ def parse_json(json_file_path):
     finally:
         if json_file != None:
             json_file.close()
-
-
