@@ -25,8 +25,8 @@ def ranking_score(Index, docnum):
 def build_idx(path):
     Index = dict()
     # TODO: use the commented definition of dirs for final test
-    dirs = os.listdir(path)
-    # dirs = ['0']
+    # dirs = os.listdir(path)
+    dirs = ['0']
     counter = 0
     for dir in dirs:
         print('dir is:')
