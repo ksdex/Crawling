@@ -58,9 +58,16 @@ def build_idx(path):
 # suppose query is a word
 def do_query(Index, q):
     # TODO: load inverted index from json
+    # index_dic = partial.parse_json("filepath here")
+    # listofid = list()
+    # listofurl = list()
     if q in Index:
         for doc in Index[q]:
         # TODO: get result from bookkeeping.json with doc[0] as the doc_id
+        # for doc in Index[q]:
+        #     listofid.append(doc[0])
+        #     for id in listofid:
+        #         listofurl.append(fileid_url_dic[id])
 
 if __name__ == "__main__":
     path = "WEBPAGES_CLEAN"
