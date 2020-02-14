@@ -1,3 +1,11 @@
+### Update on Feb 14, 2020 by Tianran:
+1. Everything should be wrapped up now. It can ask from the running terminal whether you need to rebuild the index, and if not, you can use the previous 10-page index for testing. Then it asks for a query word, and returns the score and all links that contain that word.
+2. **TODO**
+- Filter out stop words in index.py
+- Generate the whole index
+- report
+
+
 ### Update on Feb 14, 2020 by Sam:
 1. Write some code based on my imagination for those tasks in to-do list. I put them them in comment because I am not sure if they are all right.
 

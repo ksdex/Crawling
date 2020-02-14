@@ -71,7 +71,6 @@ def parse_json(json_file_path):
         print("file:", json_file_path)
         json_file = open(Path(json_file_path), "r", encoding = "utf-8")
         json_dict = json.loads(json_file.read())
-        print(json_dict['0/114'])
         return json_dict
 
     finally:
