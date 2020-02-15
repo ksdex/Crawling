@@ -7,6 +7,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.stem import WordNetLemmatizer
 from nltk import FreqDist
+from nltk.corpus import stopwords 
 from pympler import asizeof
 import json
 import sys
@@ -51,14 +52,20 @@ def parse_content(html_content, valid = True):
     tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
     initial_tokens = tokenizer.tokenize(text)
     token_list = []
+
+    #K- added STOPWORDS 
+    stopWords = set(stopwords.words('english')) 
+
+
     #lancaster_stemmer = LancasterStemmer()
     wordnet_lemmatizer = WordNetLemmatizer()
     for token in initial_tokens:
-        if re.match(r"^[a-z0-9]*$", token):
-            token_list.append(wordnet_lemmatizer.lemmatize(token))
-        else:
-            for i in filter_token(token):
-                token_list.append(wordnet_lemmatizer.lemmatize(i))
+        if token not in stopWords:
+            if re.match(r"^[a-z0-9]*$", token):
+                token_list.append(wordnet_lemmatizer.lemmatize(token))
+            else:
+                for i in filter_token(token):
+                    token_list.append(wordnet_lemmatizer.lemmatize(i))
     freq_dict = FreqDist(token_list)
     #print("Finish counting frequency.")
     return freq_dict
