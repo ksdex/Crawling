@@ -52,9 +52,9 @@ def build_idx(path):
                 f.write(x)
 
 # suppose query is a word
-def do_query(q, index_path, url_path):
+def do_query(q, index, url_path):
     fileid_url_dict = partial.parse_json(url_path + "//bookkeeping.json")
-    index = partial.parse_json(index_path)
+    #index = partial.parse_json(index_path) removed this to load dict index in fn parameter
     print(index)
     listofid = list()
     listofurl = list()
@@ -73,11 +73,17 @@ def do_query(q, index_path, url_path):
     for url in listofurl:
         print(url, '\n')
 
+
+def load_idx():
+    index = json.load(open("index.json"))
+    return index
+
+
 if __name__ == "__main__":
     url_path = "WEBPAGES_CLEAN"
-    index_path = "index.json"
-    i_build = input("Would you like to build the index? [Y/N]")
-    if i_build == 'Y':
+    index = load_idx()
+    i_build = input("Would you like to build or load the index? [B/L]")
+    if i_build == 'B':
         build_idx(url_path)
     query = input("What is your query? (only word is allowed)")
-    do_query(query, index_path, url_path)
+    do_query(query, index, url_path)
