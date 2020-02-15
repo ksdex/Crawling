@@ -11,9 +11,7 @@ from collections import defaultdict, deque
 def ranking_score(Index, docnum):
     tf = dict()
     for key in Index:
-        print(key)
         for doc in Index[key]:
-            print(doc)
             tf[key] = tf.get(key, 0) + doc[1]
     idf = dict()
     for key in Index:
@@ -25,31 +23,32 @@ def ranking_score(Index, docnum):
 def build_idx(path):
     Index = dict()
     # TODO: use the commented definition of dirs for final test
-    # dirs = os.listdir(path)
-    dirs = ['0']
+    dirs = os.listdir(path)
+    # dirs = ['1', '2']
     counter = 0
     for dir in dirs:
-        print('dir is:')
+        print('Current Directory:')
         print(dir)
         if os.path.isdir(path+'/'+dir):
             files = os.listdir(path+'/'+dir)
             for file in files:
                 counter += 1
-                with open(path+'/'+dir+'/'+file,"r",encoding="utf-8") as f1:
-                    tmp_idx = datab.makeIndex(f1)
-                    for key in tmp_idx:
-                        if key in Index:
-                            Index[key] += tmp_idx[key]
-                        else:
-                            Index[key] = tmp_idx[key]
-                    print(path+'/'+dir+'/'+file)
-            ranking_score(Index, counter)
-            with open("index.json", "w") as f:
-                list_Index = defaultdict()
-                for key in Index:
-                    list_Index[key] = list(Index[key])
-                x = json.dumps(list_Index)
-                f.write(x)
+                if os.path.getsize(path+'/'+dir+'/'+file) < 2000:
+                    with open(path+'/'+dir+'/'+file,"r",encoding="utf-8") as f1:
+                        tmp_idx = datab.makeIndex(f1)
+                        for key in tmp_idx:
+                            if key in Index:
+                                Index[key] += tmp_idx[key]
+                            else:
+                                Index[key] = tmp_idx[key]
+                        print(path+'/'+dir+'/'+file)
+    ranking_score(Index, counter)
+    with open("index.json", "w") as f:
+        list_Index = defaultdict()
+        for key in Index:
+            list_Index[key] = list(Index[key])
+        x = json.dumps(list_Index)
+        f.write(x)
 
 # suppose query is a word
 def do_query(q, index, url_path):
@@ -70,8 +69,12 @@ def do_query(q, index, url_path):
                 score.append(doc)
     print("TF-IDF score: ", score[0])
     print("Results: ")
+    counter = 0
     for url in listofurl:
-        print(url, '\n')
+        print(url)
+        counter += 1
+        if counter > 20:
+            break
 
 
 def load_idx():
@@ -81,9 +84,12 @@ def load_idx():
 
 if __name__ == "__main__":
     url_path = "WEBPAGES_CLEAN"
-    index = load_idx()
     i_build = input("Would you like to build or load the index? [B/L]")
     if i_build == 'B':
         build_idx(url_path)
+    index = load_idx()
     query = input("What is your query? (only word is allowed)")
-    do_query(query, index, url_path)
+    try:
+        do_query(query, index, url_path)
+    except:
+        print("I can't find any result. ")

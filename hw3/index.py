@@ -12,6 +12,8 @@ from pympler import asizeof
 import json
 import sys
 import re
+import nltk
+nltk.download('stopwords')
 
 def get_file_list(base_dir_path):
     '''
@@ -75,7 +77,7 @@ def parse_json(json_file_path):
 
     json_file = None
     try:
-        print("file:", json_file_path)
+        # print("file:", json_file_path)
         json_file = open(Path(json_file_path), "r", encoding = "utf-8")
         json_dict = json.loads(json_file.read())
         return json_dict
