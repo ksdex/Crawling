@@ -1,3 +1,6 @@
+###Update on Feb 16, 2020 by Tianran:
+1. The submitted version of milestone 1
+
 ### Update on Feb 14, 2020 by Tianran:
 1. Everything should be wrapped up now. It can ask from the running terminal whether you need to rebuild the index, and if not, you can use the previous 10-page index for testing. Then it asks for a query word, and returns the score and all links that contain that word.
 2. **TODO**

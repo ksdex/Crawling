@@ -32,8 +32,8 @@ def build_idx(path):
         if os.path.isdir(path+'/'+dir):
             files = os.listdir(path+'/'+dir)
             for file in files:
-                counter += 1
-                if os.path.getsize(path+'/'+dir+'/'+file) < 2000:
+                if os.path.getsize(path+'/'+dir+'/'+file) < 20000:
+                    counter += 1
                     with open(path+'/'+dir+'/'+file,"r",encoding="utf-8") as f1:
                         tmp_idx = datab.makeIndex(f1)
                         for key in tmp_idx:
@@ -69,12 +69,7 @@ def do_query(q, index, url_path):
                 score.append(doc)
     print("TF-IDF score: ", score[0])
     print("Results: ")
-    counter = 0
-    for url in listofurl:
-        print(url)
-        counter += 1
-        if counter > 20:
-            break
+    print(len(listofid))
 
 
 def load_idx():
