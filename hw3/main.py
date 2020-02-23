@@ -50,9 +50,13 @@ def build_idx(path):
         x = json.dumps(list_Index)
         f.write(x)
 
+def has_duplicates(d):
+    return len(d) != len(set(d.values()))
+
 # suppose query is a word
 def do_query(q, index, url_path):
     fileid_url_dict = partial.parse_json(url_path + "//bookkeeping.json")
+    print(has_duplicates(fileid_url_dict))
     #index = partial.parse_json(index_path) removed this to load dict index in fn parameter
     print(index)
     listofid = list()
@@ -63,13 +67,17 @@ def do_query(q, index, url_path):
         for doc in index[q]:
             if not isinstance(doc, float):
                 listofid.append(doc[0])
-                for id in listofid:
-                    listofurl.append(fileid_url_dict[id])
+                listofurl.append(fileid_url_dict[doc[0]])
+
             else:
                 score.append(doc)
     print("TF-IDF score: ", score[0])
+    print("number of results")
+    print(len(listofurl))
     print("Results: ")
-    print(len(listofid))
+    for i in range(20):
+        print(listofurl[i])
+    return listofurl
 
 
 def load_idx():
@@ -84,7 +92,5 @@ if __name__ == "__main__":
         build_idx(url_path)
     index = load_idx()
     query = input("What is your query? (only word is allowed)")
-    try:
-        do_query(query, index, url_path)
-    except:
-        print("I can't find any result. ")
+    resultlist = do_query(query, index, url_path)
+
