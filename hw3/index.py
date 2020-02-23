@@ -52,25 +52,28 @@ def parse_content(html_content, valid = True):
     if valid:
         soup = BeautifulSoup(html_content, features="html.parser")
         text = soup.get_text().lower().replace("\t", "").replace("\n", " ")
-    text = re.sub(r'[^\x00-\x7F]+', " ", text)
+        text = re.sub(r'[^\x00-\x7F]+', " ", text)
     # Tokenize
-    tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
-    initial_tokens = tokenizer.tokenize(text)
-    token_list = []
-
+    # tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
+    # initial_tokens = tokenizer.tokenize(text)
+        initial_tokens = nltk.tokenize.word_tokenize(text)
+    # token_list = []
+        wordnet_lemmatizer = WordNetLemmatizer()
     #K- added STOPWORDS 
-    stopWords = set(stopwords.words('english')) 
-
-
+        stopWords = set(stopwords.words('english'))
+        token_list = [wordnet_lemmatizer.lemmatize(token) for token in initial_tokens if token not in stopWords]
+    else:
+        token_list = []
     #lancaster_stemmer = LancasterStemmer()
-    wordnet_lemmatizer = WordNetLemmatizer()
-    for token in initial_tokens:
-        if token not in stopWords:
-            if re.match(r"^[a-z0-9]*$", token):
-                token_list.append(wordnet_lemmatizer.lemmatize(token))
-            else:
-                for i in filter_token(token):
-                    token_list.append(wordnet_lemmatizer.lemmatize(i))
+
+    # for token in initial_tokens:
+    #     if token not in stopWords:
+            # if re.match(r"^[a-z0-9]*$", token):
+            #     token_list.append(wordnet_lemmatizer.lemmatize(token))
+            # else:
+            #     for i in filter_token(token):
+            #         token_list.append(wordnet_lemmatizer.lemmatize(i))
+
     freq_dict = FreqDist(token_list)
     #print("Finish counting frequency.")
     return freq_dict
@@ -91,21 +94,23 @@ def parse_json(json_file_path):
 
 def ranking_score(Index, docnum):
     raw = list()
-    idf = dict()
     for key in Index:
+        print("Calculating idf for word ", key, ": ")
         idf = log10(docnum) - log10(len(Index[key]))
+        print("Calculating tf-idf score for word ", key, ": ")
         for doc in Index[key]:
             doc[2] = (1.0 + log10(doc[1])) * idf
-            raw.append(doc[2])
-        norm = 1 / np.sqrt(((np.array(raw)**2).sum()))
-        for doc in Index[key]:
-            doc[2] = doc[2] * norm
+            # raw.append(doc[2])
+        # print("Normalizing ...")
+        # norm = 1 / np.sqrt(((np.array(raw)**2).sum()))
+        # for doc in Index[key]:
+        #     doc[2] = doc[2] * norm
 
 def build_idx(path):
     Index = dict()
     # TODO: use the commented definition of dirs for final test
-    dirs = os.listdir(path)
-    # dirs = ['1', '2']
+    # dirs = os.listdir(path)
+    dirs = ['1', '2']
     counter = 0
     for dir in dirs:
         print('Current Directory:')
@@ -113,7 +118,7 @@ def build_idx(path):
         if os.path.isdir(path+'/'+dir):
             files = os.listdir(path+'/'+dir)
             for file in files:
-                if os.path.getsize(path+'/'+dir+'/'+file) < 20000:
+                if os.path.getsize(path+'/'+dir+'/'+file) < 200000:
                     counter += 1
                     with open(path+'/'+dir+'/'+file,"r",encoding="utf-8") as f1:
                         tmp_idx = datab.makeIndex(f1)
@@ -124,6 +129,7 @@ def build_idx(path):
                                 Index[key] = tmp_idx[key]
                         print(path+'/'+dir+'/'+file)
     ranking_score(Index, counter)
+    print(Index)
     with open("index.json", "w") as f:
         list_Index = defaultdict()
         for key in Index:
@@ -131,6 +137,10 @@ def build_idx(path):
         x = json.dumps(list_Index)
         f.write(x)
 
+
 def load_idx():
     index = json.load(open("index.json"))
     return index
+
+if __name__ == "__main__":
+    build_idx("WEBPAGES_CLEAN")
