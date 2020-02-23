@@ -1,5 +1,7 @@
 ### Update on Feb 22, 2020 by Sam:
 1. Debug
+2. Add GUI and adjust the structure of code.
+       note: the result still need title and brief introduction of each page
 
 
 ### Update on Feb 16, 2020 by Tianran:
