@@ -6,6 +6,7 @@ import nltk
 import os
 import index as partial
 from collections import deque
+from math import log10
 
 """
 mydb = mysql.connector.connect(
@@ -48,7 +49,7 @@ def makeIndex(file):
         docID = getDocID(file)
         keyInfo = deque()
         # create an entry of key term in index
-        keyInfo.append([docID, freq_dic[word]])
+        keyInfo.append([docID, freq_dic[word], 0])
         # add a value of (docID, freq) to key's linkedlist
         myDictIndex[word] = keyInfo
     return myDictIndex

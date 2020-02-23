@@ -10,7 +10,8 @@ from nltk import FreqDist
 from nltk.corpus import stopwords 
 from pympler import asizeof
 import json
-from math import log
+import numpy as np
+from math import log10
 import sys
 import re
 import nltk
@@ -89,16 +90,16 @@ def parse_json(json_file_path):
             json_file.close()
 
 def ranking_score(Index, docnum):
-    tf = dict()
-    for key in Index:
-        for doc in Index[key]:
-            tf[key] = tf.get(key, 0) + doc[1]
+    raw = list()
     idf = dict()
     for key in Index:
-        idf[key] = log(docnum) - log(len(Index[key]))
-    for key in Index:
-        score = tf[key] * 1.0 / idf[key]
-        Index[key].appendleft(score)
+        idf = log10(docnum) - log10(len(Index[key]))
+        for doc in Index[key]:
+            doc[2] = (1.0 + log10(doc[1])) * idf
+            raw.append(doc[2])
+        norm = 1 / np.sqrt(((np.array(raw)**2).sum()))
+        for doc in Index[key]:
+            doc[2] = doc[2] * norm
 
 def build_idx(path):
     Index = dict()
