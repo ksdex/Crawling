@@ -1,4 +1,4 @@
-
+import datab
 from pathlib import Path
 from bs4 import BeautifulSoup
 from collections import defaultdict
@@ -10,9 +10,11 @@ from nltk import FreqDist
 from nltk.corpus import stopwords 
 from pympler import asizeof
 import json
+from math import log
 import sys
 import re
 import nltk
+import os
 nltk.download('stopwords')
 
 def get_file_list(base_dir_path):
@@ -85,3 +87,49 @@ def parse_json(json_file_path):
     finally:
         if json_file != None:
             json_file.close()
+
+def ranking_score(Index, docnum):
+    tf = dict()
+    for key in Index:
+        for doc in Index[key]:
+            tf[key] = tf.get(key, 0) + doc[1]
+    idf = dict()
+    for key in Index:
+        idf[key] = log(docnum) - log(len(Index[key]))
+    for key in Index:
+        score = tf[key] * 1.0 / idf[key]
+        Index[key].appendleft(score)
+
+def build_idx(path):
+    Index = dict()
+    # TODO: use the commented definition of dirs for final test
+    dirs = os.listdir(path)
+    # dirs = ['1', '2']
+    counter = 0
+    for dir in dirs:
+        print('Current Directory:')
+        print(dir)
+        if os.path.isdir(path+'/'+dir):
+            files = os.listdir(path+'/'+dir)
+            for file in files:
+                if os.path.getsize(path+'/'+dir+'/'+file) < 20000:
+                    counter += 1
+                    with open(path+'/'+dir+'/'+file,"r",encoding="utf-8") as f1:
+                        tmp_idx = datab.makeIndex(f1)
+                        for key in tmp_idx:
+                            if key in Index:
+                                Index[key] += tmp_idx[key]
+                            else:
+                                Index[key] = tmp_idx[key]
+                        print(path+'/'+dir+'/'+file)
+    ranking_score(Index, counter)
+    with open("index.json", "w") as f:
+        list_Index = defaultdict()
+        for key in Index:
+            list_Index[key] = list(Index[key])
+        x = json.dumps(list_Index)
+        f.write(x)
+
+def load_idx():
+    index = json.load(open("index.json"))
+    return index
