@@ -1,4 +1,8 @@
-###Update on Feb 16, 2020 by Tianran:
+### Update on Feb 22, 2020 by Sam:
+1. Debug
+
+
+### Update on Feb 16, 2020 by Tianran:
 1. The submitted version of milestone 1
 
 ### Update on Feb 14, 2020 by Tianran:
