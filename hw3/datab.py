@@ -7,6 +7,7 @@ import os
 import index as partial
 from collections import deque
 from math import log10
+from bs4 import BeautifulSoup
 
 """
 mydb = mysql.connector.connect(
@@ -35,18 +36,38 @@ addToIndex(tokenList){
 
 
 def makeIndex(file):
+
+    titleDic = {}
+    # line = file.readline()
+    # str = ""
+    # while line != "":
+    #     #print(line)
+    #     str = str + line
+    #     line = file.readline()
+    #     freq_dic = partial.parse_content(str)
+
+    '''
+    Sam: I change sth from here
+    '''
+    docID = getDocID(file)
     myDictIndex = {}
-    line = file.readline()
-    str = ""
-    while line != "":
-        #print(line)
-        str = str + line
-        line = file.readline()
-        freq_dic = partial.parse_content(str)
+    text = file.read()
+    soup = BeautifulSoup(text, 'html.parser')
+    title = soup.find('title').string
+    titleDic[docID] = title  # this is what I will use in UI for get title, ignore it now
+    title = title.lower().replace("\t", "").replace("\n", " ")
+    [s.extract() for s in soup(['title', 'style', '[document]', 'head', 'meta', 'script'])]
+    body = soup.getText().lower().replace("\t", "").replace("\n", " ")
+
+    freq_dic = partial.parse_content(body)  # not sure if it is all right for u
+
+    '''
+    change over
+    '''
 
     #total = getWordCount(freq_dic)
     for word in freq_dic:
-        docID = getDocID(file)
+        #docID = getDocID(file)
         keyInfo = deque()
         # create an entry of key term in index
         keyInfo.append([docID, freq_dic[word], 0])
