@@ -142,5 +142,20 @@ def load_idx():
     index = json.load(open("index.json"))
     return index
 
+
+def getTitleText(url):
+    soup = BeautifulSoup(url, 'lxml')
+    title = soup.find('title')
+    return title.string
+
+
+
+def getBodytext(url):
+    soup = BeautifulSoup(url, 'lxml')
+    [s.extract() for s in soup(['title','style','[document]','head','meta','script'])]
+    text = soup.getText()
+    return text 
+
+
 if __name__ == "__main__":
     build_idx("WEBPAGES_CLEAN")
