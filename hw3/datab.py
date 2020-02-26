@@ -37,7 +37,7 @@ addToIndex(tokenList){
 
 def makeIndex(file):
 
-    titleDic = {}
+    # titleDic = {}
     # line = file.readline()
     # str = ""
     # while line != "":
@@ -52,25 +52,32 @@ def makeIndex(file):
     docID = getDocID(file)
     myDictIndex = {}
     text = file.read()
-    soup = BeautifulSoup(text, 'html.parser')
-    title = soup.find('title').string
-    titleDic[docID] = title  # this is what I will use in UI for get title, ignore it now
-    title = title.lower().replace("\t", "").replace("\n", " ")
-    [s.extract() for s in soup(['title', 'style', '[document]', 'head', 'meta', 'script'])]
-    body = soup.getText().lower().replace("\t", "").replace("\n", " ")
-
-    freq_dic = partial.parse_content(body)  # not sure if it is all right for u
-
+    # soup = BeautifulSoup(text, 'html.parser')
+    # title = soup.find('title').string
+    # titleDic[docID] = title  # this is what I will use in UI for get title, ignore it now
+    # title = title.lower().replace("\t", "").replace("\n", " ")
+    # [s.extract() for s in soup(['title', 'style', '[document]', 'head', 'meta', 'script'])]
+    # body = soup.getText().lower().replace("\t", "").replace("\n", " ")
+    # freq_dic = partial.parse_content(body)  # not sure if it is all right for u
+    # freq_dic_title = partial.parse_content(title)
+    body_dic = partial.parse_content(partial.getBodytext(text))
+    title_dic = partial.parse_content(partial.getTitleText(text))
+    important_dic = partial.parse_content(partial.getImporText(text))
     '''
     change over
     '''
 
     #total = getWordCount(freq_dic)
-    for word in freq_dic:
+    for word in body_dic:
         #docID = getDocID(file)
         keyInfo = deque()
         # create an entry of key term in index
-        keyInfo.append([docID, freq_dic[word], 0])
+        if word in title_dic:
+            keyInfo.append([docID, body_dic[word], 0, 1])
+        elif word in important_dic:
+            keyInfo.append([docID, body_dic[word], 0, 0.5])
+        else:
+            keyInfo.append([docID, body_dic[word], 0, 0])
         # add a value of (docID, freq) to key's linkedlist
         myDictIndex[word] = keyInfo
     return myDictIndex

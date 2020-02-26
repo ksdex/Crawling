@@ -47,24 +47,16 @@ def filter_token(target_str):
     return result
 
 
-def parse_content(html_content, valid=True):
-    if valid:
-        soup = BeautifulSoup(html_content, features="html.parser")
-        text = soup.get_text().lower().replace("\t", "").replace("\n", " ")
-        text = re.sub(r'[^\x00-\x7F]+', " ", text)
-        # Tokenize
-        # tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
-        # initial_tokens = tokenizer.tokenize(text)
-        initial_tokens = nltk.tokenize.word_tokenize(text)
-        # token_list = []
-        wordnet_lemmatizer = WordNetLemmatizer()
-        # K- added STOPWORDS
-        stopWords = set(stopwords.words('english'))
-        token_list = [wordnet_lemmatizer.lemmatize(token) for token in initial_tokens if token not in stopWords]
-    else:
-        token_list = []
-    # lancaster_stemmer = LancasterStemmer()
-
+def parse_content(text):
+    # Tokenize
+    # tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
+    # initial_tokens = tokenizer.tokenize(text)
+    initial_tokens = nltk.tokenize.word_tokenize(text)
+    # token_list = []
+    wordnet_lemmatizer = WordNetLemmatizer()
+    # K- added STOPWORDS
+    stopWords = set(stopwords.words('english'))
+    token_list = [wordnet_lemmatizer.lemmatize(token) for token in initial_tokens if token not in stopWords]
     # for token in initial_tokens:
     #     if token not in stopWords:
     # if re.match(r"^[a-z0-9]*$", token):
@@ -92,7 +84,7 @@ def parse_json(json_file_path):
 
 
 def ranking_score(Index, docnum):
-    raw = list()
+    # raw = list()
     for key in Index:
         print("Calculating idf for word ", key, ": ")
         idf = log10(docnum) - log10(len(Index[key]))

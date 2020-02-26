@@ -54,7 +54,10 @@ def do_query(q, index, url_path):
     # subset_index = dict(zip(list(term_set), [index[term][0] for term in term_set]))
     for term in term_list:
         for doc in index[term]:
-            score[doc[0]] = score.get(doc[0], 0) + doc[2]
+            if doc[3] != 0:
+                score[doc[0]] = score.get(doc[0], 0) + doc[2] + doc[3]
+            else:
+                score[doc[0]] = score.get(doc[0], 0) + doc[2]
     for doc_id in score:
         d_vec = np.zeros(len(term_set))
         for idx, term in enumerate(term_set):
