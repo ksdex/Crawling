@@ -1,3 +1,6 @@
+### Update on Feb 26, 2020 by Tianran:
+1. Update search.py where applies cosine similarity to calculate the score.
+
 ### Update on Feb 22, 2020 by Sam:
 1. Debug
 2. Add GUI and adjust the structure of code.
