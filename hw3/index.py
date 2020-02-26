@@ -7,7 +7,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.stem import WordNetLemmatizer
 from nltk import FreqDist
-from nltk.corpus import stopwords 
+from nltk.corpus import stopwords
 from pympler import asizeof
 import json
 import numpy as np
@@ -16,7 +16,9 @@ import sys
 import re
 import nltk
 import os
+
 nltk.download('stopwords')
+
 
 def get_file_list(base_dir_path):
     '''
@@ -25,9 +27,7 @@ def get_file_list(base_dir_path):
     return list(base_dir_path.rglob('*.*'))
 
 
-
 def filter_token(target_str):
-
     result = []
     pattern = r"^[a-z0-9]$"
     result_char = ""
@@ -36,7 +36,7 @@ def filter_token(target_str):
         # Check every character
         match = re.match(pattern, currentChar)
         if match:
-             result_char += currentChar
+            result_char += currentChar
         else:
             if (result_char != ""):
                 result.append(result_char)
@@ -47,50 +47,49 @@ def filter_token(target_str):
     return result
 
 
-def parse_content(html_content, valid = True):
-
+def parse_content(html_content, valid=True):
     if valid:
         soup = BeautifulSoup(html_content, features="html.parser")
         text = soup.get_text().lower().replace("\t", "").replace("\n", " ")
         text = re.sub(r'[^\x00-\x7F]+', " ", text)
-    # Tokenize
-    # tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
-    # initial_tokens = tokenizer.tokenize(text)
+        # Tokenize
+        # tokenizer = RegexpTokenizer(r'\w+|\$[\d\.]+|\S+')
+        # initial_tokens = tokenizer.tokenize(text)
         initial_tokens = nltk.tokenize.word_tokenize(text)
-    # token_list = []
+        # token_list = []
         wordnet_lemmatizer = WordNetLemmatizer()
-    #K- added STOPWORDS 
+        # K- added STOPWORDS
         stopWords = set(stopwords.words('english'))
         token_list = [wordnet_lemmatizer.lemmatize(token) for token in initial_tokens if token not in stopWords]
     else:
         token_list = []
-    #lancaster_stemmer = LancasterStemmer()
+    # lancaster_stemmer = LancasterStemmer()
 
     # for token in initial_tokens:
     #     if token not in stopWords:
-            # if re.match(r"^[a-z0-9]*$", token):
-            #     token_list.append(wordnet_lemmatizer.lemmatize(token))
-            # else:
-            #     for i in filter_token(token):
-            #         token_list.append(wordnet_lemmatizer.lemmatize(i))
+    # if re.match(r"^[a-z0-9]*$", token):
+    #     token_list.append(wordnet_lemmatizer.lemmatize(token))
+    # else:
+    #     for i in filter_token(token):
+    #         token_list.append(wordnet_lemmatizer.lemmatize(i))
 
     freq_dict = FreqDist(token_list)
-    #print("Finish counting frequency.")
+    # print("Finish counting frequency.")
     return freq_dict
 
 
 def parse_json(json_file_path):
-
     json_file = None
     try:
         # print("file:", json_file_path)
-        json_file = open(Path(json_file_path), "r", encoding = "utf-8")
+        json_file = open(Path(json_file_path), "r", encoding="utf-8")
         json_dict = json.loads(json_file.read())
         return json_dict
 
     finally:
         if json_file != None:
             json_file.close()
+
 
 def ranking_score(Index, docnum):
     raw = list()
@@ -106,6 +105,7 @@ def ranking_score(Index, docnum):
         # for doc in Index[key]:
         #     doc[2] = doc[2] * norm
 
+
 def build_idx(path):
     Index = dict()
     # TODO: use the commented definition of dirs for final test
@@ -115,19 +115,19 @@ def build_idx(path):
     for dir in dirs:
         print('Current Directory:')
         print(dir)
-        if os.path.isdir(path+'/'+dir):
-            files = os.listdir(path+'/'+dir)
+        if os.path.isdir(path + '/' + dir):
+            files = os.listdir(path + '/' + dir)
             for file in files:
-                if os.path.getsize(path+'/'+dir+'/'+file) < 200000:
+                if os.path.getsize(path + '/' + dir + '/' + file) < 200000:
                     counter += 1
-                    with open(path+'/'+dir+'/'+file,"r",encoding="utf-8") as f1:
+                    with open(path + '/' + dir + '/' + file, "r", encoding="utf-8") as f1:
                         tmp_idx = datab.makeIndex(f1)
                         for key in tmp_idx:
                             if key in Index:
                                 Index[key] += tmp_idx[key]
                             else:
                                 Index[key] = tmp_idx[key]
-                        print(path+'/'+dir+'/'+file)
+                        print(path + '/' + dir + '/' + file)
     ranking_score(Index, counter)
     print(Index)
     with open("index.json", "w") as f:
@@ -143,19 +143,59 @@ def load_idx():
     return index
 
 
-def getTitleText(url):
-    soup = BeautifulSoup(url, 'lxml')
-    title = soup.find('title')
-    return title.string
+def getTitleText(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    title = soup.findAll('title')
+    text = ""
+    for titletext in title:
+        text += titletext.getText()
+    print("title:",text)
+    return text.casefold().replace("\t", "").replace("\n", " ")
 
+def getImporText(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    soup.prettify()
+    text = ""
+    title = soup.findAll('title')
+    for titletext in title:
+        text += titletext.getText()
 
+    num = 1
+    head = soup.findAll('h'+str(num))
+    while len(head) != 0:
+        for headtext in head:
+            text += headtext.getText()
+        num += 1
+        head = soup.findAll('h' + str(num))
 
-def getBodytext(url):
-    soup = BeautifulSoup(url, 'lxml')
-    [s.extract() for s in soup(['title','style','[document]','head','meta','script'])]
+    bold = soup.findAll('b')
+    for boldtext in bold:
+        text += boldtext.getText()
+
+    return text.casefold().replace("\t", "").replace("\n", " ")
+
+def getBodytext(html_content):
+    soup = BeautifulSoup(html_content, 'html.parser')
+    [s.extract() for s in soup(['title', 'style', '[document]', 'head', 'meta', 'script'])]
     text = soup.getText()
-    return text 
+
+    return text.casefold().replace("\t", "").replace("\n", " ")
 
 
 if __name__ == "__main__":
-    build_idx("WEBPAGES_CLEAN")
+    # build_idx("WEBPAGES_CLEAN")
+    f1 = open("WEBPAGES_RAW/2/1", "r", encoding="utf-8")
+    text = f1.read()
+    title = getTitleText(text)
+    result = title+"\n"+getImporText(text)[len(title):]
+    print(result)
+    # title = getTitleText(text)
+    # bodytext = getBodytext(text)
+    # str = ""
+    # while line != "":
+    #     # print(line)
+    #     str = str + line
+    #     line = file.readline()
+    #     freq_dic = partial.parse_content(str)
+    # print(title)
+    # print(bodytext)
