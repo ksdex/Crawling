@@ -52,7 +52,7 @@ def makeIndex(file):
     docID = getDocID(file)
     myDictIndex = {}
     text = file.read()
-    # soup = BeautifulSoup(text, 'html.parser')
+    soup = BeautifulSoup(text, 'html.parser')
     # title = soup.find('title').string
     # titleDic[docID] = title  # this is what I will use in UI for get title, ignore it now
     # title = title.lower().replace("\t", "").replace("\n", " ")
@@ -60,9 +60,9 @@ def makeIndex(file):
     # body = soup.getText().lower().replace("\t", "").replace("\n", " ")
     # freq_dic = partial.parse_content(body)  # not sure if it is all right for u
     # freq_dic_title = partial.parse_content(title)
-    body_dic = partial.parse_content(partial.getBodytext(text))
-    title_dic = partial.parse_content(partial.getTitleText(text))
-    important_dic = partial.parse_content(partial.getImporText(text))
+    body_dic = partial.parse_content(partial.getBodytext(soup))
+    title_dic = partial.parse_content(partial.getTitleText(soup))
+    important_dic = partial.parse_content(partial.getImporText(soup))
     '''
     change over
     '''
@@ -85,7 +85,8 @@ def makeIndex(file):
 
 def getDocID(file):
   filePath = file.name
-  docID = filePath[15:]
+  print(filePath)
+  docID = filePath[13:]
   return docID
 
 """

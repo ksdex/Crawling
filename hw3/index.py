@@ -101,8 +101,8 @@ def ranking_score(Index, docnum):
 def build_idx(path):
     Index = dict()
     # TODO: use the commented definition of dirs for final test
-    # dirs = os.listdir(path)
-    dirs = ['1', '2']
+    dirs = os.listdir(path)
+    # dirs = ['1', '2']
     counter = 0
     for dir in dirs:
         print('Current Directory:')
@@ -135,22 +135,15 @@ def load_idx():
     return index
 
 
-def getTitleText(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
+def getTitleText(soup):
     title = soup.findAll('title')
     text = ""
     for titletext in title:
         text += titletext.getText()
-    print("title:",text)
     return text.casefold().replace("\t", "").replace("\n", " ")
 
-def getImporText(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
-    soup.prettify()
+def getImporText(soup):
     text = ""
-    title = soup.findAll('title')
-    for titletext in title:
-        text += titletext.getText()
 
     num = 1
     head = soup.findAll('h'+str(num))
@@ -166,8 +159,7 @@ def getImporText(html_content):
 
     return text.casefold().replace("\t", "").replace("\n", " ")
 
-def getBodytext(html_content):
-    soup = BeautifulSoup(html_content, 'html.parser')
+def getBodytext(soup):
     [s.extract() for s in soup(['title', 'style', '[document]', 'head', 'meta', 'script'])]
     text = soup.getText()
 
@@ -177,10 +169,15 @@ def getBodytext(html_content):
 if __name__ == "__main__":
     # build_idx("WEBPAGES_CLEAN")
     f1 = open("WEBPAGES_RAW/2/1", "r", encoding="utf-8")
-    text = f1.read()
-    title = getTitleText(text)
-    result = title+"\n"+getImporText(text)[len(title):]
-    print(result)
+    text1 = "Thành phố Irvine, liên có dân"
+    counter = parse_content(text1)
+    for key in counter:
+        print(key)
+        print(counter[key])
+    # text = f1.read()
+    # title = getTitleText(text)
+    # result = title+"\n"+getImporText(text)[len(title):]
+    # print(result)
     # title = getTitleText(text)
     # bodytext = getBodytext(text)
     # str = ""

@@ -45,7 +45,7 @@ class SearchUI(QWidget):
         btn1.clicked.connect(searching)
 
         def clear():
-            search_result.setText("")
+            search_result.setModel(None)
             search_item.setText("")
         btn2.clicked.connect(clear)
 

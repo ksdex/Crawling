@@ -26,7 +26,6 @@ def do_query(q, index, url_path):
     fileid_url_dict = partial.parse_json(url_path + "//bookkeeping.json")
     #index = partial.parse_json(index_path) removed this to load dict index in fn parameter
     # print(index)
-    listofid = list()
     listofurl = list()
     score = dict()
     query = re.sub(r'[^\x00-\x7F]+', " ", q)
@@ -36,16 +35,6 @@ def do_query(q, index, url_path):
     query_list = [wordnet_lemmatizer.lemmatize(token) for token in query if token not in stopWords]
     term_list = [word for word in query_list if word in index]
     term_set = set(term_list)
-    # if q in index:
-    #     # TODO: get result from bookkeeping.json with doc[0] as the doc_id
-    #     print("index here")
-    #     print(index[q])
-    #     for doc in index[q]:
-    #         if not isinstance(doc, float):
-    #             listofid.append(doc[0])
-    #             listofurl.append(fileid_url_dict[doc[0]])
-    #         else:
-    #             score.append(doc)
     freq_q = nltk.FreqDist(term_list)
     q_vec = np.zeros(len(term_set))
     for idx, word in enumerate(term_set):
@@ -71,9 +60,30 @@ def do_query(q, index, url_path):
 
     if len(score) >= 20:
         result = Counter(score).most_common(20)
-        listofurl = [fileid_url_dict[doc[0]] for doc in result]
+        for doc in result:
+            f1 = open("WEBPAGES_RAW/" + str(doc[0]), "r", encoding="utf-8")
+            html_content = f1.read()
+            soup = BeautifulSoup(html_content, 'html.parser')
+            print(doc[0])
+            title = partial.getTitleText(soup)
+            body = partial.getBodytext(soup)
+            if len(body) > 120:
+                resulttext = fileid_url_dict[doc[0]] + "\n" + title + "\n" + body[:120]
+            else:
+                resulttext = fileid_url_dict[doc[0]] + "\n" + title + "\n" + body
+            listofurl.append(resulttext)
     else:
-        listofurl = [fileid_url_dict[doc] for doc in sorted(score, key=score.get, reverse=True)]
+        for doc in sorted(score, key=score.get, reverse=True):
+            f1 = open("WEBPAGES_RAW/" + str(doc[0]), "r", encoding="utf-8")
+            html_content = f1.read()
+            soup = BeautifulSoup(html_content, 'html.parser')
+            title = partial.getTitleText(soup)
+            body = partial.getBodytext(soup)
+            if len(body) > 20:
+                resulttext = fileid_url_dict[doc[0]] + "\n" + title + "\n" + body[:20]
+            else:
+                resulttext = fileid_url_dict[doc[0]] + "\n" + title + "\n" + body
+            listofurl.append(resulttext)
     # print("TF-IDF score: ", score[0])
     # print("number of results")
     # print(len(listofurl))
