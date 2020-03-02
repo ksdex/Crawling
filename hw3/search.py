@@ -26,6 +26,7 @@ def do_query(q, index, url_path):
     fileid_url_dict = partial.parse_json(url_path + "//bookkeeping.json")
     #index = partial.parse_json(index_path) removed this to load dict index in fn parameter
     # print(index)
+    anchor_words = ["faculty","course","community","wiki","about"]
     listofurl = list()
     score = dict()
     query = re.sub(r'[^\x00-\x7F]+', " ", q)
@@ -40,13 +41,22 @@ def do_query(q, index, url_path):
     for idx, word in enumerate(term_set):
         q_vec[idx] = (1.0 + log10(freq_q[word])) * (index[word][0][2] / (1.0 + log10(index[word][0][1])))
     q_vec /= np.linalg.norm(q_vec)
+
     # subset_index = dict(zip(list(term_set), [index[term][0] for term in term_set]))
     for term in term_list:
         for doc in index[term]:
+            flag = False
+            url_anchor = fileid_url_dict[doc[0]];
+            for word in anchor_words:
+                if word in url_anchor:
+                    flag = True
             if doc[3] != 0:
                 score[doc[0]] = score.get(doc[0], 0) + doc[2] + doc[3]
             else:
                 score[doc[0]] = score.get(doc[0], 0) + doc[2]
+            if flag:
+                score[doc[0]] += 1
+
     for doc_id in score:
         d_vec = np.zeros(len(term_set))
         for idx, term in enumerate(term_set):
